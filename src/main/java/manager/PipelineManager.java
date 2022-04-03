@@ -5,6 +5,7 @@ import cruncher.CruncherComponentCounterImpl;
 import file_input.FileInputComponent;
 import file_input.FileInputComponentAsciiImpl;
 import javafx.collections.ObservableList;
+import javafx.scene.text.Text;
 import model.Directory;
 import model.Disk;
 import output.OutputComponent;
@@ -28,8 +29,8 @@ public class PipelineManager {
     private final List<CruncherComponent> cruncherComponents = new ArrayList<>();
     private final List<OutputComponent> outputComponents = new ArrayList<>();
 
-    public void addNewFileInputComponent(Disk disk) {
-        FileInputComponent fileInputComponent = new FileInputComponentAsciiImpl(disk, fileInputThreadPool);
+    public void addNewFileInputComponent(Disk disk, Text statusLabel) {
+        FileInputComponent fileInputComponent = new FileInputComponentAsciiImpl(disk, fileInputThreadPool, statusLabel);
         fileInputComponents.add(fileInputComponent);
     }
 
@@ -56,12 +57,17 @@ public class PipelineManager {
         fip.getDirectories().remove(directory);
     }
 
-    public void addNewCruncherComponent(int arity) {
-        CruncherComponent cruncherComponent = new CruncherComponentCounterImpl(arity, cruncherForkJoinPool);
+    public void addNewCruncherComponent(int arity, Text statusLabel) {
+        CruncherComponent cruncherComponent = new CruncherComponentCounterImpl(arity, cruncherForkJoinPool, statusLabel);
         cruncherComponents.add(cruncherComponent);
     }
 
     public void removeCruncherComponent(int arity) {
+        for (final FileInputComponent fip : fileInputComponents) {
+            CruncherComponent cruncherComponent = getCruncherComponent(arity);
+            fip.disconnectCruncherComponent(cruncherComponent);
+        }
+
         cruncherComponents.removeIf(cruncherComponent -> cruncherComponent.getArity() == arity);
     }
 

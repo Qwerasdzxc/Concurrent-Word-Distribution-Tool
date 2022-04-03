@@ -1,5 +1,7 @@
 package file_input.workers;
 
+import javafx.application.Platform;
+import javafx.scene.text.Text;
 import model.Disk;
 
 import java.io.File;
@@ -8,16 +10,24 @@ import java.nio.file.Paths;
 
 public class FileInputWorkerAsciiImpl extends FileInputWorker {
 
-    public FileInputWorkerAsciiImpl(Disk disk, File file) {
-        super(disk, file);
+    public FileInputWorkerAsciiImpl(Disk disk, File file, Text statusLabel) {
+        super(disk, file, statusLabel);
     }
 
     @Override
-    public String call() throws Exception {
+    public String call() {
         synchronized (getDisk()) {
-            System.out.println(getFile().getName());
+            Platform.runLater(() -> {
+                getStatusLabel().setText("Reading: " + getFile().getName());
+            });
             try {
-                return new String(Files.readAllBytes(Paths.get(getFile().getPath())));
+                byte[] bytes = Files.readAllBytes(Paths.get(getFile().getPath()));
+
+                Platform.runLater(() -> {
+                    getStatusLabel().setText("Idle");
+                });
+
+                return new String(bytes);
             } catch (OutOfMemoryError e) {
                 // TODO: Stop app
                 System.out.println("No memory");

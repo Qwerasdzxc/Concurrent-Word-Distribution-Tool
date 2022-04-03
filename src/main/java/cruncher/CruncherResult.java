@@ -7,10 +7,13 @@ public class CruncherResult {
 
     private String filename;
 
+    private int arity;
+
     private Future<Map<String, Long>> result;
 
-    public CruncherResult(String filename, Future<Map<String, Long>> result) {
+    public CruncherResult(String filename, int arity, Future<Map<String, Long>> result) {
         this.filename = filename;
+        this.arity = arity;
         this.result = result;
     }
 
@@ -20,6 +23,14 @@ public class CruncherResult {
 
     public void setFilename(String filename) {
         this.filename = filename;
+    }
+
+    public int getArity() {
+        return arity;
+    }
+
+    public void setArity(int arity) {
+        this.arity = arity;
     }
 
     public Future<Map<String, Long>> getResult() {

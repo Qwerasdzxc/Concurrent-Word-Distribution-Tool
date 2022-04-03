@@ -1,5 +1,6 @@
 package file_input.workers;
 
+import javafx.scene.text.Text;
 import model.Disk;
 
 import java.io.File;
@@ -11,9 +12,12 @@ public abstract class FileInputWorker implements Callable<String> {
 
     private File file;
 
-    public FileInputWorker(Disk disk, File file) {
+    private Text statusLabel;
+
+    public FileInputWorker(Disk disk, File file, Text statusLabel) {
         this.disk = disk;
         this.file = file;
+        this.statusLabel = statusLabel;
     }
 
     public Disk getDisk() {
@@ -30,5 +34,13 @@ public abstract class FileInputWorker implements Callable<String> {
 
     public void setFile(File file) {
         this.file = file;
+    }
+
+    public Text getStatusLabel() {
+        return statusLabel;
+    }
+
+    public void setStatusLabel(Text statusLabel) {
+        this.statusLabel = statusLabel;
     }
 }

@@ -23,7 +23,7 @@ public class OutputComponentCacheImpl extends OutputComponent {
                 data.put(cruncherResult.getFilename(), cruncherResult.getResult());
 
                 Platform.runLater(() -> {
-                    outputResults.add(cruncherResult.getFilename() + "*");
+                    outputResults.add(cruncherResult.getFilename() + "-arity" + cruncherResult.getArity() + "*");
                 });
 
                 threadPool.execute(() -> {
@@ -31,8 +31,8 @@ public class OutputComponentCacheImpl extends OutputComponent {
                         cruncherResult.getResult().get();
                         System.out.println("Output received and finished: " + cruncherResult.getFilename());
                         Platform.runLater(() -> {
-                            outputResults.remove(cruncherResult.getFilename() + "*");
-                            outputResults.add(cruncherResult.getFilename());
+                            outputResults.remove(cruncherResult.getFilename() + "-arity" + cruncherResult.getArity() + "*");
+                            outputResults.add(cruncherResult.getFilename() + "-arity" + cruncherResult.getArity());
                         });
                     } catch (InterruptedException | ExecutionException e) {
                         e.printStackTrace();

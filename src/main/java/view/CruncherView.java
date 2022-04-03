@@ -44,7 +44,7 @@ public class CruncherView {
 	}
 
 	private void createCruncherComponent() {
-		PipelineManager.getInstance().addNewCruncherComponent(cruncher.getArity());
+		PipelineManager.getInstance().addNewCruncherComponent(cruncher.getArity(), status);
 		PipelineManager.getInstance().attachCruncherComponentToOutputComponent(cruncher.getArity());
 	}
 
@@ -55,8 +55,8 @@ public class CruncherView {
 	private void removeCruncher() {
 		mainView.removeCruncher(this);
 
-		PipelineManager.getInstance().removeCruncherComponent(cruncher.getArity());
 		PipelineManager.getInstance().detachCruncherComponentFromOutputComponent(cruncher.getArity());
+		PipelineManager.getInstance().removeCruncherComponent(cruncher.getArity());
 	}
 
 	public Cruncher getCruncher() {

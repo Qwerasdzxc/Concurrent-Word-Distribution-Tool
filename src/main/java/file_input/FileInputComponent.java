@@ -1,6 +1,7 @@
 package file_input;
 
 import cruncher.CruncherComponent;
+import javafx.scene.text.Text;
 import model.Directory;
 import model.Disk;
 
@@ -17,9 +18,12 @@ public abstract class FileInputComponent implements Runnable {
     private List<Directory> directories = new CopyOnWriteArrayList<>();
     private List<CruncherComponent> connectedCrunchers = new CopyOnWriteArrayList<>();
 
-    public FileInputComponent(Disk disk, ExecutorService threadPool) {
+    private final Text statusLabel;
+
+    public FileInputComponent(Disk disk, ExecutorService threadPool, Text statusLabel) {
         this.disk = disk;
         this.threadPool = threadPool;
+        this.statusLabel = statusLabel;
     }
 
     public void start() {
@@ -44,6 +48,10 @@ public abstract class FileInputComponent implements Runnable {
 
     public List<CruncherComponent> getConnectedCrunchers() {
         return connectedCrunchers;
+    }
+
+    public Text getStatusLabel() {
+        return statusLabel;
     }
 
     public void connectCruncherComponent(CruncherComponent cruncherComponent) {

@@ -237,7 +237,7 @@ public class MainView {
 
 		try {
 			OutputComponent outputComponent = PipelineManager.getInstance().getOutputComponent();
-			Map<String, Long> resultData = outputComponent.getFinishedResult(selectedFile);
+			Map<String, Long> resultData = outputComponent.poll(selectedFile);
 			outputComponent.showSortedData(resultData, lineChart);
 		} catch (Exception e) {
 			e.printStackTrace();

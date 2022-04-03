@@ -129,7 +129,7 @@ public class FileInputView {
     }
 
     private void createFileInputComponent() {
-        PipelineManager.getInstance().addNewFileInputComponent(fileInput.getDisk());
+        PipelineManager.getInstance().addNewFileInputComponent(fileInput.getDisk(), status);
     }
 
     private void updateRemoveDirectoryButtonEnabled() {

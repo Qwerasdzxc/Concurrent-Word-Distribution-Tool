@@ -1,6 +1,11 @@
 package cruncher;
 
 import file_input.FileInputResult;
+import javafx.application.Platform;
+import javafx.collections.FXCollections;
+import javafx.collections.ListChangeListener;
+import javafx.collections.ObservableList;
+import javafx.scene.text.Text;
 import output.OutputComponent;
 
 import java.util.List;
@@ -18,11 +23,32 @@ public abstract class CruncherComponent implements Runnable {
     private final BlockingQueue<FileInputResult> receivedFileInputData;
     private final List<OutputComponent> connectedOutputs;
 
-    public CruncherComponent(int arity, ForkJoinPool forkJoinPool) {
+    private final ObservableList<String> filesInCrunchingProcess;
+
+    private final Text statusLabel;
+
+    public CruncherComponent(int arity, ForkJoinPool forkJoinPool, Text statusLabel) {
         this.arity = arity;
         this.forkJoinPool = forkJoinPool;
+        this.statusLabel = statusLabel;
         this.receivedFileInputData = new LinkedBlockingQueue<>();
         this.connectedOutputs = new CopyOnWriteArrayList<>();
+        this.filesInCrunchingProcess = FXCollections.observableArrayList();
+
+        filesInCrunchingProcess.addListener((ListChangeListener<String>) change -> {
+            Platform.runLater(() -> {
+                StringBuilder activeFiles = new StringBuilder();
+
+                for (final String file : filesInCrunchingProcess) {
+                    activeFiles.append(file).append("\n");
+                }
+
+                if (activeFiles.length() > 0)
+                    statusLabel.setText("Crunching:\n" + activeFiles);
+                else
+                    statusLabel.setText("");
+            });
+        });
 
         new Thread(this).start();
     }
@@ -45,6 +71,14 @@ public abstract class CruncherComponent implements Runnable {
 
     public ForkJoinPool getForkJoinPool() {
         return forkJoinPool;
+    }
+
+    public Text getStatusLabel() {
+        return statusLabel;
+    }
+
+    public ObservableList<String> getFilesInCrunchingProcess() {
+        return filesInCrunchingProcess;
     }
 
     public void connectOutputComponent(OutputComponent op) {

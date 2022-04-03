@@ -37,12 +37,18 @@ public abstract class OutputComponent implements Runnable {
         }
     }
 
-    public Map<String, Long> getFinishedResult(String filename) throws Exception {
+    public Map<String, Long> poll(String filename) throws Exception {
+        filename = filename.substring(0, filename.indexOf(".txt") + 4);
         Future<Map<String, Long>> resultForFile = data.get(filename);
         if (!resultForFile.isDone())
-            throw new Exception("File " + filename + "is still in Cruncher phase!");
+            return null;
 
         return resultForFile.get();
+    }
+
+    public Future<Map<String, Long>> take(String filename) {
+        filename = filename.substring(0, filename.indexOf(".txt") + 4);
+        return data.get(filename);
     }
 
     public void showSortedData(Map<String, Long> data, LineChart<Number, Number> chart) {
@@ -51,7 +57,8 @@ public abstract class OutputComponent implements Runnable {
 
     public void calculateSumData(List<String> selected, String resultName) {
         List<Future<Map<String, Long>>> results = new ArrayList<>();
-        for (final String filename : selected) {
+        for (String filename : selected) {
+            filename = filename.substring(0, filename.indexOf(".txt") + 4);
             results.add(data.get(filename.replaceAll("\\*", "")));
         }
 

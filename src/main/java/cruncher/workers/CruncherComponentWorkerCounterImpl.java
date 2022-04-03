@@ -1,6 +1,8 @@
 package cruncher.workers;
 
 import file_input.FileInputResult;
+import javafx.collections.ObservableList;
+import javafx.scene.text.Text;
 
 import java.text.BreakIterator;
 import java.util.ArrayList;
@@ -17,8 +19,8 @@ public class CruncherComponentWorkerCounterImpl extends CruncherComponentWorker 
 
     private final long L = 10485760L;
 
-    public CruncherComponentWorkerCounterImpl(int arity, FileInputResult fileInputResult) {
-        super(arity, fileInputResult);
+    public CruncherComponentWorkerCounterImpl(int arity, FileInputResult fileInputResult, ObservableList<String> filesInCrunchingProcess) {
+        super(arity, fileInputResult, filesInCrunchingProcess);
 
         this.length = fileInputResult.getData().length();
         this.data = fileInputResult.getData();
@@ -28,6 +30,8 @@ public class CruncherComponentWorkerCounterImpl extends CruncherComponentWorker 
     protected Map<String, Long> compute() {
         if (length == 0)
             return new HashMap<>();
+
+        filesInCrunchingProcess.add(getFileInputResult().getFilename());
 
         Map<String, Long> results = new ConcurrentHashMap<>();
 
@@ -40,6 +44,8 @@ public class CruncherComponentWorkerCounterImpl extends CruncherComponentWorker 
                     results.put(word, 1L);
             }
         }
+
+        filesInCrunchingProcess.remove(getFileInputResult().getFilename());
 
         return results;
     }
