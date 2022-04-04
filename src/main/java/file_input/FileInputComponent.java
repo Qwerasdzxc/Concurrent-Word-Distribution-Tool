@@ -13,10 +13,14 @@ public abstract class FileInputComponent implements Runnable {
 
     private final Disk disk;
 
+    private volatile boolean isStarted;
+    private volatile boolean isRunning;
+    private volatile boolean shouldExit;
+
     private final ExecutorService threadPool;
 
-    private List<Directory> directories = new CopyOnWriteArrayList<>();
-    private List<CruncherComponent> connectedCrunchers = new CopyOnWriteArrayList<>();
+    private final List<Directory> directories = new CopyOnWriteArrayList<>();
+    private final List<CruncherComponent> connectedCrunchers = new CopyOnWriteArrayList<>();
 
     private final Text statusLabel;
 
@@ -26,12 +30,39 @@ public abstract class FileInputComponent implements Runnable {
         this.statusLabel = statusLabel;
     }
 
-    public void start() {
-        new Thread(this).start();
+    public synchronized void start() {
+        if (!isStarted) {
+            new Thread(this).start();
+            isStarted = true;
+        }
+
+        setRunning(true);
+        notify();
+    }
+
+    public synchronized void pause() {
+        setRunning(false);
+        notify();
     }
 
     public Disk getDisk() {
         return disk;
+    }
+
+    public boolean isRunning() {
+        return isRunning;
+    }
+
+    public void setRunning(boolean running) {
+        isRunning = running;
+    }
+
+    public void setShouldExit(boolean shouldExit) {
+        this.shouldExit = shouldExit;
+    }
+
+    public boolean shouldExit() {
+        return shouldExit;
     }
 
     public ExecutorService getThreadPool() {
@@ -40,10 +71,6 @@ public abstract class FileInputComponent implements Runnable {
 
     public List<Directory> getDirectories() {
         return directories;
-    }
-
-    public void setDirectories(List<Directory> directories) {
-        this.directories = directories;
     }
 
     public List<CruncherComponent> getConnectedCrunchers() {

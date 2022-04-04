@@ -20,28 +20,32 @@ public class OutputComponentSumWorkerImpl extends OutputComponentSumWorker {
 
     @Override
     public void run() {
-        Map<String, Long> summedResult = new HashMap<>();
-        List<Map<String, Long>> finishedResults = new ArrayList<>();
+        try {
+            Map<String, Long> summedResult = new HashMap<>();
+            List<Map<String, Long>> finishedResults = new ArrayList<>();
 
-        for (final Future<Map<String, Long>> result : data) {
-            try {
-                finishedResults.add(result.get());
-            } catch (InterruptedException | ExecutionException e) {
-                e.printStackTrace();
+            for (final Future<Map<String, Long>> result : data) {
+                try {
+                    finishedResults.add(result.get());
+                } catch (InterruptedException | ExecutionException e) {
+                    e.printStackTrace();
+                }
             }
-        }
 
-        for (final Map<String, Long> result : finishedResults) {
-            for (Map.Entry<String, Long> entry : result.entrySet()) {
-                summedResult.merge(entry.getKey(), entry.getValue(), Long::sum);
+            for (final Map<String, Long> result : finishedResults) {
+                for (Map.Entry<String, Long> entry : result.entrySet()) {
+                    summedResult.merge(entry.getKey(), entry.getValue(), Long::sum);
+                }
             }
+
+            PipelineManager.getInstance().getOutputComponent().addResultToDataMap(resultName, CompletableFuture.completedFuture(summedResult));
+
+            Platform.runLater(() -> {
+                outputResults.remove(resultName + "*");
+                outputResults.add(resultName);
+            });
+        } catch (OutOfMemoryError e) {
+            PipelineManager.getInstance().terminateApplication();
         }
-
-        PipelineManager.getInstance().getOutputComponent().addResultToDataMap(resultName, CompletableFuture.completedFuture(summedResult));
-
-        Platform.runLater(() -> {
-            outputResults.remove(resultName + "*");
-            outputResults.add(resultName);
-        });
     }
 }

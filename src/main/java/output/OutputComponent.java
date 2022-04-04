@@ -28,6 +28,8 @@ public abstract class OutputComponent implements Runnable {
         this.outputResults = outputResults;
         this.receivedCruncherData = new LinkedBlockingQueue<>();
         this.data = new ConcurrentHashMap<>();
+
+        new Thread(this).start();
     }
 
     public void addToQueue(CruncherResult cruncherResult) {

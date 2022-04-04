@@ -32,8 +32,10 @@ public class CruncherComponentCounterImpl extends CruncherComponent {
                     outputComponent.addToQueue(cruncherResult);
                 }
             } catch (InterruptedException e) {
-                e.printStackTrace();
+                break;
             }
         }
+
+        System.out.println("Cruncher shut down.");
     }
 }

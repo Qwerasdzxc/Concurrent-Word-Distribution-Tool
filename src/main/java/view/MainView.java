@@ -48,15 +48,11 @@ public class MainView {
 
 	private Button addCruncher;
 
-	private Alert alert;
-
 	public void initMainView(BorderPane borderPane, Stage stage) {
 
 		this.stage = stage;
 
 		PipelineManager.getInstance().setView(this);
-
-		alert = new Alert(AlertType.ERROR, "Application out of memory.", ButtonType.CLOSE);
 
 		fileInputViews = new ArrayList<>();
 		availableCrunchers = new ArrayList<>();
@@ -372,7 +368,8 @@ public class MainView {
 	}
 
 	public void showOutOfMemoryError() {
-		this.alert.showAndWait();
+		Alert alert = new Alert(AlertType.ERROR, "Application out of memory.", ButtonType.CLOSE);
+		alert.showAndWait();
 
 		Platform.exit();
 		System.exit(0);

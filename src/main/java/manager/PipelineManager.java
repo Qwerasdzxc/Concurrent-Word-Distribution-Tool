@@ -28,7 +28,7 @@ public class PipelineManager {
 
     private MainView view;
 
-    private AtomicBoolean acceptingNewWork = new AtomicBoolean(true);
+    private final AtomicBoolean acceptingNewWork = new AtomicBoolean(true);
 
     private final ExecutorService fileInputThreadPool = Executors.newCachedThreadPool();
     private final ForkJoinPool cruncherForkJoinPool = ForkJoinPool.commonPool();
@@ -53,7 +53,10 @@ public class PipelineManager {
     }
 
     public void removeFileInputComponent(Disk disk) {
-        fileInputComponents.removeIf(fileInputComponent -> fileInputComponent.getDisk() == disk);
+        FileInputComponent fip = getFileInputComponent(disk);
+        fip.setShouldExit(true);
+
+        fileInputComponents.remove(fip);
     }
 
     public void addDirectoryToFileInputComponent(Disk disk, Directory directory) {
@@ -72,12 +75,14 @@ public class PipelineManager {
     }
 
     public void removeCruncherComponent(int arity) {
+        CruncherComponent cruncherComponent = getCruncherComponent(arity);
+        cruncherComponent.stopCruncher();
+
         for (final FileInputComponent fip : fileInputComponents) {
-            CruncherComponent cruncherComponent = getCruncherComponent(arity);
             fip.disconnectCruncherComponent(cruncherComponent);
         }
 
-        cruncherComponents.removeIf(cruncherComponent -> cruncherComponent.getArity() == arity);
+        cruncherComponents.remove(cruncherComponent);
     }
 
     public CruncherComponent getCruncherComponent(int arity) {

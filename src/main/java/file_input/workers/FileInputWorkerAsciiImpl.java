@@ -2,6 +2,7 @@ package file_input.workers;
 
 import javafx.application.Platform;
 import javafx.scene.text.Text;
+import manager.PipelineManager;
 import model.Disk;
 
 import java.io.File;
@@ -29,8 +30,7 @@ public class FileInputWorkerAsciiImpl extends FileInputWorker {
 
                 return new String(bytes);
             } catch (OutOfMemoryError e) {
-                // TODO: Stop app
-                System.out.println("No memory");
+                PipelineManager.getInstance().terminateApplication();
             } catch (Exception e) {
                 e.printStackTrace();
             }

@@ -12,8 +12,6 @@ public class OutputComponentCacheImpl extends OutputComponent {
 
     public OutputComponentCacheImpl(ExecutorService threadPool, ObservableList<String> outputResults) {
         super(threadPool, outputResults);
-
-        new Thread(this).start();
     }
 
     @Override
@@ -21,6 +19,15 @@ public class OutputComponentCacheImpl extends OutputComponent {
         while (true) {
             try {
                 CruncherResult cruncherResult = receivedCruncherData.take();
+
+                if (data.containsKey(cruncherResult.getFilename())) {
+                    data.remove(cruncherResult.getFilename());
+
+                    Platform.runLater(() -> {
+                        outputResults.remove(cruncherResult.getFilename() + "-arity" + cruncherResult.getArity());
+                    });
+                }
+
                 data.put(cruncherResult.getFilename(), cruncherResult.getResult());
 
                 Platform.runLater(() -> {
@@ -33,7 +40,7 @@ public class OutputComponentCacheImpl extends OutputComponent {
                 threadPool.execute(() -> {
                     try {
                         cruncherResult.getResult().get();
-                        System.out.println("Output received and finished: " + cruncherResult.getFilename());
+
                         Platform.runLater(() -> {
                             outputResults.remove(cruncherResult.getFilename() + "-arity" + cruncherResult.getArity() + "*");
                             outputResults.add(cruncherResult.getFilename() + "-arity" + cruncherResult.getArity());
@@ -44,7 +51,7 @@ public class OutputComponentCacheImpl extends OutputComponent {
 
                 });
             } catch (InterruptedException e) {
-                e.printStackTrace();
+                break;
             }
         }
     }

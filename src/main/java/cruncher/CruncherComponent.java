@@ -14,7 +14,7 @@ import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.concurrent.ForkJoinPool;
 import java.util.concurrent.LinkedBlockingQueue;
 
-public abstract class CruncherComponent implements Runnable {
+public abstract class CruncherComponent extends Thread {
 
     private final int arity;
 
@@ -50,7 +50,7 @@ public abstract class CruncherComponent implements Runnable {
             });
         });
 
-        new Thread(this).start();
+        start();
     }
 
     public void addToQueue(FileInputResult fileInputResult) {
@@ -59,6 +59,10 @@ public abstract class CruncherComponent implements Runnable {
         } catch (InterruptedException e) {
             e.printStackTrace();
         }
+    }
+
+    public void stopCruncher() {
+        interrupt();
     }
 
     protected BlockingQueue<FileInputResult> getReceivedFileInputData() {

@@ -1,5 +1,6 @@
 package view;
 
+import file_input.FileInputComponent;
 import javafx.geometry.Insets;
 import javafx.scene.control.Alert;
 import javafx.scene.control.Alert.AlertType;
@@ -219,7 +220,16 @@ public class FileInputView {
     }
 
     private void start() {
-        PipelineManager.getInstance().getFileInputComponent(fileInput.getDisk()).start();
+        FileInputComponent fip = PipelineManager.getInstance().getFileInputComponent(fileInput.getDisk());
+
+        if (fip.isRunning()) {
+            fip.pause();
+            start.setText("Start");
+        }
+        else {
+            fip.start();
+            start.setText("Pause");
+        }
     }
 
     private void removeDiskInput() {

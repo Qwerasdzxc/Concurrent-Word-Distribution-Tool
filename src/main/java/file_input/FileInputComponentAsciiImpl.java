@@ -26,19 +26,34 @@ public class FileInputComponentAsciiImpl extends FileInputComponent {
 
     @Override
     public void run() {
-        System.out.println("Started scan");
+        while (!shouldExit()) {
+            System.out.println("Started scan");
 
-        for (Directory value : getDirectories()) {
-            File directory = value.getDirectory();
+            for (Directory value : getDirectories()) {
+                File directory = value.getDirectory();
+
+                try {
+                    readDirectory(directory);
+                } catch (InterruptedException e) {
+                    e.printStackTrace();
+                    return;
+                }
+            }
+            System.out.println("Stopped scan");
 
             try {
-                readDirectory(directory);
+                synchronized (this) {
+                    if (isRunning())
+                        wait(2000);
+                    else
+                        wait();
+                }
             } catch (InterruptedException e) {
                 e.printStackTrace();
-                return;
             }
         }
-        System.out.println("Stopped scan");
+
+        System.out.println("FileInput shut down.");
     }
 
     private void readDirectory(File directory) throws InterruptedException {
