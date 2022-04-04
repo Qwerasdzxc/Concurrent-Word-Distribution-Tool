@@ -8,7 +8,7 @@ public class Cruncher {
 	
 	public Cruncher(int arity) {
 		this.arity = arity;
-		this.name = "Counter 0";
+		this.name = "Counter " + arity;
 	}
 	
 	@Override

@@ -108,8 +108,8 @@ public class PipelineManager {
         fip.disconnectCruncherComponent(cc);
     }
 
-    public void addNewOutputComponent(ObservableList<String> outputResults) {
-        OutputComponent outputComponent = new OutputComponentCacheImpl(outputThreadPool, outputResults);
+    public void addNewOutputComponent(ObservableList<String> outputResults, int sortProgressLimit) {
+        OutputComponent outputComponent = new OutputComponentCacheImpl(outputThreadPool, outputResults, sortProgressLimit);
         outputComponents.add(outputComponent);
     }
 

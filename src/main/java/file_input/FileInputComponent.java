@@ -21,8 +21,8 @@ public abstract class FileInputComponent implements Runnable {
 
     private final ExecutorService threadPool;
 
-    private final List<Directory> directories = new CopyOnWriteArrayList<>();
-    private final List<CruncherComponent> connectedCrunchers = new CopyOnWriteArrayList<>();
+    private final List<Directory> directories;
+    private final List<CruncherComponent> connectedCrunchers;
 
     private final Text statusLabel;
 
@@ -31,6 +31,9 @@ public abstract class FileInputComponent implements Runnable {
         this.threadPool = threadPool;
         this.statusLabel = statusLabel;
         this.sleepTime = sleepTime;
+
+        this.directories = new CopyOnWriteArrayList<>();
+        this.connectedCrunchers = new CopyOnWriteArrayList<>();
     }
 
     public synchronized void start() {

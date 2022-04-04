@@ -3,25 +3,40 @@ package output.workers;
 import javafx.application.Platform;
 import javafx.scene.chart.LineChart;
 import javafx.scene.chart.XYChart;
+import javafx.scene.control.ProgressBar;
 import manager.PipelineManager;
 
 import java.util.*;
+import java.util.concurrent.atomic.AtomicInteger;
 
 public class OutputComponentSortWorkerImpl extends OutputComponentSortWorker {
 
-    public OutputComponentSortWorkerImpl(Map<String, Long> data, LineChart<Number, Number> chart) {
-        super(data, chart);
+    public OutputComponentSortWorkerImpl(Map<String, Long> data, LineChart<Number, Number> chart, ProgressBar progressBar, int sortProgressLimit) {
+        super(data, chart, progressBar, sortProgressLimit);
     }
 
     @Override
     public void run() {
         try {
+            Platform.runLater(() -> {
+                progressBar.setProgress(0);
+                progressBar.setVisible(true);
+            });
+
+            int n = data.keySet().size();
+
             List<Map.Entry<String, Long>> list = new ArrayList<>(data.entrySet());
-            list.sort(Map.Entry.comparingByValue(new Comparator<Long>() {
-                @Override
-                public int compare(Long first, Long second) {
-                    return (int) (second - first);
+
+            AtomicInteger currentProgress = new AtomicInteger(0);
+            list.sort(Map.Entry.comparingByValue((first, second) -> {
+                if (currentProgress.get() % sortProgressLimit == 0) {
+                    Platform.runLater(() -> {
+                        progressBar.setProgress((double) currentProgress.get() / (n * Math.log10(n)));
+                    });
                 }
+
+                currentProgress.addAndGet(1);
+                return (int) (second - first);
             }));
 
             XYChart.Series<Number, Number> series = new XYChart.Series<>();
@@ -36,8 +51,8 @@ public class OutputComponentSortWorkerImpl extends OutputComponentSortWorker {
             Platform.runLater(() -> {
                 chart.getData().clear();
                 chart.getData().addAll(series);
-
-                System.out.println("Sorter worker end");
+                progressBar.setProgress(0);
+                progressBar.setVisible(false);
             });
         } catch (OutOfMemoryError e) {
             PipelineManager.getInstance().terminateApplication();

@@ -2,6 +2,8 @@ package view;
 
 import app.Config;
 import javafx.application.Platform;
+import javafx.beans.value.ChangeListener;
+import javafx.beans.value.ObservableValue;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.event.EventHandler;
@@ -45,6 +47,8 @@ public class MainView {
 	private LineChart<Number, Number> lineChart;
 	private ArrayList<Cruncher> availableCrunchers;
 	private ObservableList<String> outputResults;
+	private Text sortText;
+	private ProgressBar sortProgressBar;
 
 	private Button addCruncher;
 
@@ -93,7 +97,9 @@ public class MainView {
 
 	private void initOutput() {
 		outputResults = FXCollections.observableArrayList();
-		PipelineManager.getInstance().addNewOutputComponent(outputResults);
+
+		String sortProgressLimit = Config.getProperty("sort_progress_limit");
+		PipelineManager.getInstance().addNewOutputComponent(outputResults, Integer.parseInt(sortProgressLimit));
 	}
 
 	private void initFileInput() {
@@ -224,6 +230,18 @@ public class MainView {
 		right.getChildren().add(sumResult);
 		VBox.setMargin(sumResult, new Insets(0, 0, 10, 0));
 
+		sortText = new Text();
+		sortProgressBar = new ProgressBar(0);
+		sortProgressBar.setVisible(false);
+		sortProgressBar.progressProperty().addListener((observableValue, number, value) -> {
+			if (value.intValue() > 0)
+				sortText.setText("Sorting...");
+			else
+				sortText.setText("");
+		});
+		right.getChildren().add(sortText);
+		right.getChildren().add(sortProgressBar);
+
 		borderPane.setRight(right);
 	}
 
@@ -258,13 +276,16 @@ public class MainView {
 
 	private void getSingleResult() {
 		String selectedFile = results.getSelectionModel().getSelectedItem();
-		if (selectedFile.endsWith("*"))
+		if (selectedFile.endsWith("*")) {
+			Alert newAlert = new Alert(Alert.AlertType.ERROR, "Result not ready yet!", ButtonType.OK);
+			newAlert.showAndWait();
 			return;
+		}
 
 		try {
 			OutputComponent outputComponent = PipelineManager.getInstance().getOutputComponent();
 			Map<String, Long> resultData = outputComponent.poll(selectedFile);
-			outputComponent.showSortedData(resultData, lineChart);
+			outputComponent.showSortedData(resultData, lineChart, sortProgressBar);
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
@@ -275,16 +296,14 @@ public class MainView {
 		textInputDialog.setHeaderText("Enter result name");
 		textInputDialog.initModality(Modality.APPLICATION_MODAL);
 		textInputDialog.showAndWait().ifPresent(resultName -> {
-			if (results.getItems().contains(resultName)) {
+			if (results.getItems().contains(resultName) || results.getItems().contains(resultName + "*")) {
 				Alert newAlert = new Alert(Alert.AlertType.ERROR, "Result name already exists!", ButtonType.OK);
 				newAlert.showAndWait();
 				return;
 			}
 
 			List<String> selected = new ArrayList<>(results.getItems());
-//			ProgressBar progressBar = new ProgressBar(0);
-//			this.outputView.getChildren().add(progressBar);
-			PipelineManager.getInstance().getOutputComponent().calculateSumData(selected, resultName);
+			PipelineManager.getInstance().getOutputComponent().calculateSumData(selected, resultName, right);
 		});
 	}
 

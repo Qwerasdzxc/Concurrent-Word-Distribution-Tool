@@ -10,8 +10,8 @@ import java.util.concurrent.ExecutorService;
 
 public class OutputComponentCacheImpl extends OutputComponent {
 
-    public OutputComponentCacheImpl(ExecutorService threadPool, ObservableList<String> outputResults) {
-        super(threadPool, outputResults);
+    public OutputComponentCacheImpl(ExecutorService threadPool, ObservableList<String> outputResults, int sortProgressLimit) {
+        super(threadPool, outputResults, sortProgressLimit);
     }
 
     @Override

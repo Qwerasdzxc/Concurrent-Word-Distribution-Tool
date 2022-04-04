@@ -4,6 +4,8 @@ import cruncher.CruncherResult;
 import javafx.application.Platform;
 import javafx.collections.ObservableList;
 import javafx.scene.chart.LineChart;
+import javafx.scene.control.ProgressBar;
+import javafx.scene.layout.Pane;
 import manager.PipelineManager;
 import output.workers.OutputComponentSortWorkerImpl;
 import output.workers.OutputComponentSumWorkerImpl;
@@ -23,9 +25,12 @@ public abstract class OutputComponent implements Runnable {
 
     protected final BlockingQueue<CruncherResult> receivedCruncherData;
 
-    protected OutputComponent(ExecutorService threadPool, ObservableList<String> outputResults) {
+    protected final int sortProgressLimit;
+
+    protected OutputComponent(ExecutorService threadPool, ObservableList<String> outputResults, int sortProgressLimit) {
         this.threadPool = threadPool;
         this.outputResults = outputResults;
+        this.sortProgressLimit = sortProgressLimit;
         this.receivedCruncherData = new LinkedBlockingQueue<>();
         this.data = new ConcurrentHashMap<>();
 
@@ -54,14 +59,14 @@ public abstract class OutputComponent implements Runnable {
         return data.get(filename);
     }
 
-    public void showSortedData(Map<String, Long> data, LineChart<Number, Number> chart) {
+    public void showSortedData(Map<String, Long> data, LineChart<Number, Number> chart, ProgressBar progressBar) {
         if (!PipelineManager.getInstance().getAcceptingNewWork().get())
             return;
 
-        threadPool.execute(new OutputComponentSortWorkerImpl(data, chart));
+        threadPool.execute(new OutputComponentSortWorkerImpl(data, chart, progressBar, sortProgressLimit));
     }
 
-    public void calculateSumData(List<String> selected, String resultName) {
+    public void calculateSumData(List<String> selected, String resultName, Pane pane) {
         List<Future<Map<String, Long>>> results = new ArrayList<>();
         for (String filename : selected) {
             filename = filename.substring(0, filename.indexOf(".txt") + 4);
@@ -75,7 +80,7 @@ public abstract class OutputComponent implements Runnable {
         if (!PipelineManager.getInstance().getAcceptingNewWork().get())
             return;
 
-        threadPool.execute(new OutputComponentSumWorkerImpl(resultName, outputResults, results));
+        threadPool.execute(new OutputComponentSumWorkerImpl(resultName, outputResults, results, pane));
     }
 
     public void addResultToDataMap(String filename, Future<Map<String, Long>> result) {
