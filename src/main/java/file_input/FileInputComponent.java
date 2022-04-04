@@ -79,8 +79,16 @@ public abstract class FileInputComponent implements Runnable {
         return threadPool;
     }
 
-    public List<Directory> getDirectories() {
+    protected List<Directory> getDirectories() {
         return directories;
+    }
+
+    public void addDirectory(Directory directory) {
+        this.directories.add(directory);
+    }
+
+    public void removeDirectory(Directory directory) {
+        this.directories.remove(directory);
     }
 
     public List<CruncherComponent> getConnectedCrunchers() {
@@ -96,6 +104,6 @@ public abstract class FileInputComponent implements Runnable {
     }
 
     public void disconnectCruncherComponent(CruncherComponent cruncherComponent) {
-        this.connectedCrunchers.add(cruncherComponent);
+        this.connectedCrunchers.remove(cruncherComponent);
     }
 }

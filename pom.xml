@@ -42,10 +42,25 @@
                         <!-- Usage: mvn clean javafx:run -->
                         <id>default-cli</id>
                         <configuration>
-                            <mainClass>RAF.KiDSDomaci1.App</mainClass>
+                            <mainClass>app.AppStarter</mainClass>
                         </configuration>
                     </execution>
                 </executions>
+            </plugin>
+            <plugin>
+                <!-- Build an executable JAR -->
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-jar-plugin</artifactId>
+                <version>3.1.0</version>
+                <configuration>
+                    <archive>
+                        <manifest>
+                            <addClasspath>true</addClasspath>
+                            <classpathPrefix>lib/</classpathPrefix>
+                            <mainClass>app.AppStarter</mainClass>
+                        </manifest>
+                    </archive>
+                </configuration>
             </plugin>
         </plugins>
     </build>

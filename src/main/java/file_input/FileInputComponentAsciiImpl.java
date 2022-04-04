@@ -56,6 +56,23 @@ public class FileInputComponentAsciiImpl extends FileInputComponent {
         System.out.println("FileInput shut down.");
     }
 
+    @Override
+    public void removeDirectory(Directory directory) {
+        super.removeDirectory(directory);
+
+        cleanReadFilesForDirectory(directory.getDirectory());
+    }
+
+    private void cleanReadFilesForDirectory(File directory) {
+        for (File file : Objects.requireNonNull(directory.listFiles())) {
+            if (file.isDirectory()) {
+                cleanReadFilesForDirectory(file);
+            } else if (file.getName().endsWith(FILE_EXTENSION)) {
+                filesRead.remove(file.getAbsolutePath());
+            }
+        }
+    }
+
     private void readDirectory(File directory) throws InterruptedException {
         for (File file : Objects.requireNonNull(directory.listFiles())) {
             if (file.isDirectory()) {

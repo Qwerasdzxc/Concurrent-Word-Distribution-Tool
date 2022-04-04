@@ -61,12 +61,12 @@ public class PipelineManager {
 
     public void addDirectoryToFileInputComponent(Disk disk, Directory directory) {
         FileInputComponent fip = getFileInputComponent(disk);
-        fip.getDirectories().add(directory);
+        fip.addDirectory(directory);
     }
 
     public void removeDirectoryFromFileInputComponent(Disk disk, Directory directory) {
         FileInputComponent fip = getFileInputComponent(disk);
-        fip.getDirectories().remove(directory);
+        fip.removeDirectory(directory);
     }
 
     public void addNewCruncherComponent(int arity, Text statusLabel) {
