@@ -3,6 +3,7 @@ package output;
 import cruncher.CruncherResult;
 import javafx.application.Platform;
 import javafx.collections.ObservableList;
+import manager.PipelineManager;
 
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ExecutorService;
@@ -26,6 +27,9 @@ public class OutputComponentCacheImpl extends OutputComponent {
                     outputResults.add(cruncherResult.getFilename() + "-arity" + cruncherResult.getArity() + "*");
                 });
 
+                if (!PipelineManager.getInstance().getAcceptingNewWork().get())
+                    return;
+
                 threadPool.execute(() -> {
                     try {
                         cruncherResult.getResult().get();
@@ -35,7 +39,7 @@ public class OutputComponentCacheImpl extends OutputComponent {
                             outputResults.add(cruncherResult.getFilename() + "-arity" + cruncherResult.getArity());
                         });
                     } catch (InterruptedException | ExecutionException e) {
-                        e.printStackTrace();
+                        System.out.println("Worker thread interrupted.");
                     }
 
                 });

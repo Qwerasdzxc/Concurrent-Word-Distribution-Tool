@@ -4,22 +4,31 @@ import cruncher.CruncherComponent;
 import cruncher.CruncherComponentCounterImpl;
 import file_input.FileInputComponent;
 import file_input.FileInputComponentAsciiImpl;
+import javafx.application.Platform;
 import javafx.collections.ObservableList;
 import javafx.scene.text.Text;
+import javafx.stage.Stage;
 import model.Directory;
 import model.Disk;
 import output.OutputComponent;
 import output.OutputComponentCacheImpl;
+import view.MainView;
 
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ForkJoinPool;
+import java.util.concurrent.ThreadPoolExecutor;
+import java.util.concurrent.atomic.AtomicBoolean;
 
 public class PipelineManager {
 
     private static PipelineManager instance;
+
+    private MainView view;
+
+    private AtomicBoolean acceptingNewWork = new AtomicBoolean(true);
 
     private final ExecutorService fileInputThreadPool = Executors.newCachedThreadPool();
     private final ForkJoinPool cruncherForkJoinPool = ForkJoinPool.commonPool();
@@ -115,6 +124,47 @@ public class PipelineManager {
         OutputComponent op = getOutputComponent();
 
         cc.disconnectOutputComponent(op);
+    }
+
+    public void shutDownApplication(Stage shutDownStage) {
+        new Thread(() -> {
+            acceptingNewWork.set(false);
+
+            this.fileInputThreadPool.shutdownNow();
+            this.cruncherForkJoinPool.shutdownNow();
+            this.outputThreadPool.shutdownNow();
+
+            while (true) {
+                boolean inputWorking = ((ThreadPoolExecutor) fileInputThreadPool).getActiveCount() > 0;
+                boolean cruncherWorking = cruncherForkJoinPool.getActiveThreadCount() > 0;
+                boolean outputWorking = ((ThreadPoolExecutor) outputThreadPool).getActiveCount() > 0;
+
+                if (!inputWorking && !cruncherWorking && !outputWorking)
+                break;
+            }
+
+            Platform.runLater(shutDownStage::close);
+        }).start();
+    }
+
+    public void terminateApplication() {
+        Platform.runLater(() -> {
+            view.showOutOfMemoryError();
+        });
+
+        new Thread(() -> {
+            this.fileInputThreadPool.shutdownNow();
+            this.cruncherForkJoinPool.shutdownNow();
+            this.outputThreadPool.shutdownNow();
+        }).start();
+    }
+
+    public void setView(MainView view) {
+        this.view = view;
+    }
+
+    public AtomicBoolean getAcceptingNewWork() {
+        return acceptingNewWork;
     }
 
     public static PipelineManager getInstance() {

@@ -3,6 +3,7 @@ package file_input;
 import cruncher.CruncherComponent;
 import file_input.workers.FileInputWorkerAsciiImpl;
 import javafx.scene.text.Text;
+import manager.PipelineManager;
 import model.Directory;
 import model.Disk;
 
@@ -57,6 +58,9 @@ public class FileInputComponentAsciiImpl extends FileInputComponent {
     }
 
     private void createFileInputWorker(File file) {
+        if (!PipelineManager.getInstance().getAcceptingNewWork().get())
+            return;
+
         Future<String> fileData = getThreadPool().submit(new FileInputWorkerAsciiImpl(getDisk(), file, getStatusLabel()));
         try {
             forwardDataToCruncherComponent(new FileInputResult(file.getName(), fileData.get()));

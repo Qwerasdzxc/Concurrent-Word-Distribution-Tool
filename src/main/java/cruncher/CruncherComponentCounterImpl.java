@@ -2,8 +2,8 @@ package cruncher;
 
 import cruncher.workers.CruncherComponentWorkerCounterImpl;
 import file_input.FileInputResult;
-import javafx.application.Platform;
 import javafx.scene.text.Text;
+import manager.PipelineManager;
 import output.OutputComponent;
 
 import java.util.Map;
@@ -22,7 +22,8 @@ public class CruncherComponentCounterImpl extends CruncherComponent {
             try {
                 FileInputResult fileInputResult = getReceivedFileInputData().take();
 
-                System.out.println("Started crunching: " + fileInputResult.getFilename());
+                if (!PipelineManager.getInstance().getAcceptingNewWork().get())
+                    return;
 
                 Future<Map<String, Long>> countResult = getForkJoinPool().submit(new CruncherComponentWorkerCounterImpl(getArity(), fileInputResult, getFilesInCrunchingProcess()));
 

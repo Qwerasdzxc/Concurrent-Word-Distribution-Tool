@@ -4,6 +4,7 @@ import cruncher.CruncherResult;
 import javafx.application.Platform;
 import javafx.collections.ObservableList;
 import javafx.scene.chart.LineChart;
+import manager.PipelineManager;
 import output.workers.OutputComponentSortWorkerImpl;
 import output.workers.OutputComponentSumWorkerImpl;
 
@@ -52,6 +53,9 @@ public abstract class OutputComponent implements Runnable {
     }
 
     public void showSortedData(Map<String, Long> data, LineChart<Number, Number> chart) {
+        if (!PipelineManager.getInstance().getAcceptingNewWork().get())
+            return;
+
         threadPool.execute(new OutputComponentSortWorkerImpl(data, chart));
     }
 
@@ -65,6 +69,9 @@ public abstract class OutputComponent implements Runnable {
         Platform.runLater(() -> {
             outputResults.add(resultName + "*");
         });
+
+        if (!PipelineManager.getInstance().getAcceptingNewWork().get())
+            return;
 
         threadPool.execute(new OutputComponentSumWorkerImpl(resultName, outputResults, results));
     }

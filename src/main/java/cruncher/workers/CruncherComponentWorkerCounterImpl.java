@@ -3,6 +3,7 @@ package cruncher.workers;
 import file_input.FileInputResult;
 import javafx.collections.ObservableList;
 import javafx.scene.text.Text;
+import manager.PipelineManager;
 
 import java.text.BreakIterator;
 import java.util.ArrayList;
@@ -35,14 +36,19 @@ public class CruncherComponentWorkerCounterImpl extends CruncherComponentWorker 
 
         Map<String, Long> results = new ConcurrentHashMap<>();
 
-        if (arity == 1) {
-            List<String> words = getWords(data);
-            for (final String word : words) {
-                if (results.containsKey(word))
-                    results.put(word, results.get(word) + 1);
-                else
-                    results.put(word, 1L);
+        try {
+            if (arity == 1) {
+                List<String> words = getWords(data);
+                for (final String word : words) {
+                    if (results.containsKey(word))
+                        results.put(word, results.get(word) + 1);
+                    else
+                        results.put(word, 1L);
+                }
             }
+
+        } catch (OutOfMemoryError e) {
+            PipelineManager.getInstance().terminateApplication();
         }
 
         filesInCrunchingProcess.remove(getFileInputResult().getFilename());

@@ -4,7 +4,10 @@ import app.Config;
 import javafx.application.Platform;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
+import javafx.event.EventHandler;
 import javafx.geometry.Insets;
+import javafx.geometry.Pos;
+import javafx.scene.Scene;
 import javafx.scene.chart.LineChart;
 import javafx.scene.chart.NumberAxis;
 import javafx.scene.control.*;
@@ -16,6 +19,8 @@ import javafx.scene.layout.VBox;
 import javafx.scene.text.Text;
 import javafx.stage.Modality;
 import javafx.stage.Stage;
+import javafx.stage.StageStyle;
+import javafx.stage.WindowEvent;
 import manager.PipelineManager;
 import model.Cruncher;
 import model.Disk;
@@ -43,12 +48,18 @@ public class MainView {
 
 	private Button addCruncher;
 
+	private Alert alert;
+
 	public void initMainView(BorderPane borderPane, Stage stage) {
 
 		this.stage = stage;
 
-		fileInputViews = new ArrayList<FileInputView>();
-		availableCrunchers = new ArrayList<Cruncher>();
+		PipelineManager.getInstance().setView(this);
+
+		alert = new Alert(AlertType.ERROR, "Application out of memory.", ButtonType.CLOSE);
+
+		fileInputViews = new ArrayList<>();
+		availableCrunchers = new ArrayList<>();
 
 		left = new HBox();
 
@@ -63,6 +74,25 @@ public class MainView {
 		initCenter(borderPane);
 
 		initRight(borderPane);
+
+		stage.setOnCloseRequest(windowEvent -> {
+			Stage shutdownStage = new Stage();
+			shutdownStage.initStyle(StageStyle.UNDECORATED);
+			shutdownStage.setTitle("Shut down in progress.");
+
+			VBox vBox = new VBox();
+			vBox.setAlignment(Pos.CENTER);
+			vBox.getChildren().add(new Text("Application shut down in progress. Please wait..."));
+			shutdownStage.setScene(new Scene(vBox, 300, 300));
+			shutdownStage.initModality(Modality.APPLICATION_MODAL);
+
+			PipelineManager.getInstance().shutDownApplication(shutdownStage);
+
+			shutdownStage.showAndWait();
+
+			Platform.exit();
+			System.exit(0);
+		});
 	}
 
 	private void initOutput() {
@@ -339,6 +369,13 @@ public class MainView {
 		availableCrunchers.remove(cruncherView.getCruncher());
 		updateCrunchers(availableCrunchers);
 		cruncher.getChildren().remove(cruncherView.getCruncherView());
+	}
+
+	public void showOutOfMemoryError() {
+		this.alert.showAndWait();
+
+		Platform.exit();
+		System.exit(0);
 	}
 
 	public Pane getRight() {
