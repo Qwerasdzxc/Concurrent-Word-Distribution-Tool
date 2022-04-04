@@ -20,8 +20,8 @@ public class FileInputComponentAsciiImpl extends FileInputComponent {
 
     private static final String FILE_EXTENSION = ".txt";
 
-    public FileInputComponentAsciiImpl(Disk disk, ExecutorService threadPool, Text statusLabel) {
-        super(disk, threadPool, statusLabel);
+    public FileInputComponentAsciiImpl(Disk disk, ExecutorService threadPool, Text statusLabel, int sleepTime) {
+        super(disk, threadPool, statusLabel, sleepTime);
     }
 
     @Override
@@ -44,7 +44,7 @@ public class FileInputComponentAsciiImpl extends FileInputComponent {
             try {
                 synchronized (this) {
                     if (isRunning())
-                        wait(2000);
+                        wait(getSleepTime());
                     else
                         wait();
                 }

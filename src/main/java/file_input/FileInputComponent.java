@@ -17,6 +17,8 @@ public abstract class FileInputComponent implements Runnable {
     private volatile boolean isRunning;
     private volatile boolean shouldExit;
 
+    private final int sleepTime;
+
     private final ExecutorService threadPool;
 
     private final List<Directory> directories = new CopyOnWriteArrayList<>();
@@ -24,10 +26,11 @@ public abstract class FileInputComponent implements Runnable {
 
     private final Text statusLabel;
 
-    public FileInputComponent(Disk disk, ExecutorService threadPool, Text statusLabel) {
+    public FileInputComponent(Disk disk, ExecutorService threadPool, Text statusLabel, int sleepTime) {
         this.disk = disk;
         this.threadPool = threadPool;
         this.statusLabel = statusLabel;
+        this.sleepTime = sleepTime;
     }
 
     public synchronized void start() {
@@ -63,6 +66,10 @@ public abstract class FileInputComponent implements Runnable {
 
     public boolean shouldExit() {
         return shouldExit;
+    }
+
+    public int getSleepTime() {
+        return sleepTime;
     }
 
     public ExecutorService getThreadPool() {

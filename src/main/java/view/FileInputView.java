@@ -1,5 +1,6 @@
 package view;
 
+import app.Config;
 import file_input.FileInputComponent;
 import javafx.geometry.Insets;
 import javafx.scene.control.Alert;
@@ -130,7 +131,8 @@ public class FileInputView {
     }
 
     private void createFileInputComponent() {
-        PipelineManager.getInstance().addNewFileInputComponent(fileInput.getDisk(), status);
+        String sleepTime = Config.getProperty("file_input_sleep_time");
+        PipelineManager.getInstance().addNewFileInputComponent(fileInput.getDisk(), status, Integer.parseInt(sleepTime));
     }
 
     private void updateRemoveDirectoryButtonEnabled() {

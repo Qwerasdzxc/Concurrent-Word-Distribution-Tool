@@ -12,8 +12,6 @@ public class Config {
 		config = new Properties();
 		try {
 			config.load(new FileInputStream("config.properties"));
-		} catch (FileNotFoundException e) {
-			e.printStackTrace();
 		} catch (IOException e) {
 			e.printStackTrace();
 		}
@@ -21,9 +19,5 @@ public class Config {
 	
 	public static String getProperty(String key) {
 		return config.getProperty(key);
-	}
-	
-	static String getPropert(String key, String defaultValue) {
-		return config.getProperty(key, defaultValue);
 	}
 }

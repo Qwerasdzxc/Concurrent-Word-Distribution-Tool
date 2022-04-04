@@ -38,8 +38,8 @@ public class PipelineManager {
     private final List<CruncherComponent> cruncherComponents = new ArrayList<>();
     private final List<OutputComponent> outputComponents = new ArrayList<>();
 
-    public void addNewFileInputComponent(Disk disk, Text statusLabel) {
-        FileInputComponent fileInputComponent = new FileInputComponentAsciiImpl(disk, fileInputThreadPool, statusLabel);
+    public void addNewFileInputComponent(Disk disk, Text statusLabel, int sleepTime) {
+        FileInputComponent fileInputComponent = new FileInputComponentAsciiImpl(disk, fileInputThreadPool, statusLabel, sleepTime);
         fileInputComponents.add(fileInputComponent);
     }
 
